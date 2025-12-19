@@ -23,7 +23,7 @@ async fn main() -> Result<()> {
     // println!("rpc_url : {}", rpc_url);
     let rpc = RpcClient::new(rpc_url);
 
-    let offset = 1;
+    let offset = 2;
 
     // --------------------------------
     // slot and block
@@ -44,7 +44,7 @@ async fn main() -> Result<()> {
         max_supported_transaction_version: Some(0),
     };
 
-    for offset in 0..=offset {
+    for offset in 0..offset {
         let block = rpc.get_block_with_config(slot - offset, config)?;
         println!("Block time: {}", block.block_time.unwrap_or(0));
         parse_tx_in_block(&block);
@@ -111,11 +111,14 @@ fn parse_tx_in_block(block: &UiConfirmedBlock) {
                         }
 
                         // parsed instruction이라고 하더라도 두 경우가 존재함
+                        // native한 프로그램들과 알려진 프로그램들은 IDL을 rpc가 알고 있으므로 완전히 parsed
+                        // 누군가가 작성한 프로그램들은 partial parsed (defi, 등)
                         pub enum UiParsedInstruction {
                             Parsed(ParsedInstruction),
                             PartiallyDecoded(UiPartiallyDecodedInstruction),
                         }
 
+                        // 알려진 프로그램의 instruction
                         pub struct ParsedInstruction {
                             pub program: String,
                             pub program_id: String,
@@ -183,7 +186,6 @@ fn parse_tx_in_block(block: &UiConfirmedBlock) {
         }
 
         println!("====== parsing count ======");
-        // println!("encoding: {:?}", config.encoding);
         println!(
             "parsed msg : {} | raw msg: {}",
             parsed_message_cnt, raw_message_cnt
