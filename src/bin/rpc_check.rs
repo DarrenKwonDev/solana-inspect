@@ -6,7 +6,7 @@ use solana_transaction_status::{TransactionDetails, UiTransactionEncoding};
 
 #[tokio::main]
 async fn main() -> Result<()> {
-    env_logger::init();
+    // env_logger::init();
     dotenv::dotenv().ok();
 
     let rpc_url = env::var("SOLANA_RPC_URL")

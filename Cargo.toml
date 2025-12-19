@@ -16,3 +16,7 @@ dotenv = "0.15"
 [[bin]]
 name = "rpc_check"
 path = "src/bin/rpc_check.rs"
+
+[[bin]]
+name = "dex_parse"
+path = "src/bin/dex_parse.rs"
