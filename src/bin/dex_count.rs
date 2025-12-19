@@ -3,7 +3,13 @@ use solana_client::{rpc_client::RpcClient, rpc_config::RpcBlockConfig};
 use solana_inspect::dex_filter;
 use solana_sdk::pubkey::Pubkey;
 use solana_transaction_status::{TransactionDetails, UiConfirmedBlock, UiTransactionEncoding};
-use std::env;
+use std::{collections::HashMap, env};
+
+#[derive(Debug)]
+pub struct DEXStats {
+    pub total_dex_txs: usize,
+    pub by_protocol: HashMap<String, usize>,
+}
 
 #[tokio::main]
 async fn main() -> Result<()> {
@@ -60,7 +66,10 @@ fn parse_tx_in_block(block: &UiConfirmedBlock) {
     let mut full_instr_cnt = 0;
     let mut partial_instr_cnt = 0;
 
-    let mut dex_count = 0;
+    let mut stats = DEXStats {
+        total_dex_txs: 0,
+        by_protocol: HashMap::new(),
+    };
 
     // --------------------------------
     // parse transactions
@@ -147,8 +156,13 @@ fn parse_tx_in_block(block: &UiConfirmedBlock) {
                                         };
 
                                         if let Ok(pubkey) = program_id_str.parse::<Pubkey>() {
-                                            if let Some(_) = dex_filter::is_dex_program(&pubkey) {
-                                                dex_count += 1;
+                                            if let Some(protocol) =
+                                                dex_filter::is_dex_program(&pubkey)
+                                            {
+                                                stats.total_dex_txs += 1;
+
+                                                *stats.by_protocol.entry(protocol).or_insert(0) +=
+                                                    1;
                                             }
                                         }
                                     }
@@ -183,7 +197,14 @@ fn parse_tx_in_block(block: &UiConfirmedBlock) {
             parsed_instr_cnt, full_instr_cnt, partial_instr_cnt
         );
 
-        println!("\nDEX TXs in block [{}]: {}", block.blockhash, dex_count);
+        println!(
+            "\nDEX TXs in block [{}]: {}",
+            block.blockhash, stats.total_dex_txs
+        );
+        for (protocol, count) in &stats.by_protocol {
+            println!("{}: {}", protocol, count);
+        }
+
         println!("=============================");
     }
 }
