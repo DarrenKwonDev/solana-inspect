@@ -150,10 +150,6 @@ fn parse_tx_in_block(block: &UiConfirmedBlock) {
                                             if let Some(_) = dex_filter::is_dex_program(&pubkey) {
                                                 dex_count += 1;
                                             }
-
-                                            if dex_count < 50 {
-                                                println!("Program: {}", program_id_str);
-                                            }
                                         }
                                     }
                                     solana_transaction_status::UiInstruction::Compiled(_) => {
