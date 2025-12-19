@@ -1,0 +1,15 @@
+[package]
+name = "solana-inspect"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+solana-client = "1.18"
+solana-sdk = "1.18"
+solana-transaction-status = "1.18"
+tokio = { version = "1", features = ["full"] }
+anyhow = "1.0"
+env_logger = "0.11"
+log = "0.4"
+dotenv = "0.15"
+
