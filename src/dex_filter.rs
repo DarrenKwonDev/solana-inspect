@@ -69,77 +69,77 @@ pub const MARINADE_VOTER_STAKE_REGISTRY: &str = "VoteMBhDCqGLRgYpp9o7DGyq81KNmwj
 pub const MARINADE_NATIVE_STAKING_PROXY: &str = "mnspJQyF1KdDEs5c6YJPocYdY1esBgVQFufM2dY9oDk";
 
 pub fn is_swap(program_id: &Pubkey) -> Option<String> {
-    let program_str = program_id.to_string();
+  let program_str = program_id.to_string();
 
-    match program_str.as_str() {
-        RAYDIUM_CLMM | RAYDIUM_LEGACY_AMM | RAYDIUM_CPMM => Some("Raydium".to_string()),
-        _ => None,
-    }
+  match program_str.as_str() {
+    RAYDIUM_CLMM | RAYDIUM_LEGACY_AMM | RAYDIUM_CPMM => Some("Raydium".to_string()),
+    _ => None,
+  }
 }
 
 pub fn is_dex_program(program_id: &Pubkey) -> Option<String> {
-    let program_str = program_id.to_string();
+  let program_str = program_id.to_string();
 
-    match program_str.as_str() {
-        // Raydium
-        RAYDIUM_CPMM | RAYDIUM_LEGACY_AMM | RAYDIUM_CLMM | RAYDIUM_STABLE | RAYDIUM_ROUTING => {
-            Some("Raydium".to_string())
-        }
-
-        // Orca
-        ORCA_WHIRLPOOL => Some("Orca".to_string()),
-
-        // Jupiter
-        JUPITER_SWAP
-        | JUPITER_PERPETUALS
-        | JUPITER_REFERRAL
-        | JUPITER_DOVES
-        | JUPITER_LEND_EARN
-        | JUPITER_LEND_BORROW
-        | JUPITER_LEND_EARN_REWARDS
-        | JUPITER_LEND_LIQUIDITY
-        | JUPITER_LEND_BORROW_ORACLE
-        | JUPITER_LIMIT_ORDER_V2
-        | JUPITER_DCA
-        | JUPITER_LOCK
-        | JUPITER_GOVERNANCE
-        | JUPITER_VOTER => Some("Jupiter".to_string()),
-
-        // Drift
-        DRIFT_V2 => Some("Drift".to_string()),
-
-        // Kamino
-        KAMINO_LEND | KAMINO_LIQUIDITY | KAMINO_VAULTS => Some("Kamino".to_string()),
-
-        // Meteora
-        METEORA_DLMM
-        | METEORA_DAMM_V2
-        | METEORA_DBC
-        | METEORA_PRESALE_VAULT
-        | METEORA_ALPHA_VAULT
-        | METEORA_DYNAMIC_FEE_SHARING
-        | METEORA_ZAP
-        | METEORA_DAMM_V1
-        | METEORA_DYNAMIC_VAULT
-        | METEORA_STAKE2EARN
-        | METEORA_FARM
-        | METEORA_MERCURIAL_STABLE_SWAP => Some("Meteora".to_string()),
-
-        // Pump.fun
-        PUMP_PROGRAM | PUMP_AMM | PUMP_FEES => Some("Pump.fun".to_string()),
-
-        // Marinade
-        MARINADE_LIQUID_STAKING
-        | MARINADE_SPL_GOVERNANCE
-        | MARINADE_TOKADAPT
-        | MARINADE_ESCROW_RELOCKER
-        | MARINADE_VALIDATOR_GAUGES
-        | MARINADE_LIQUIDITY_GAUGES
-        | MARINADE_REFERRAL
-        | MARINADE_DIRECTED_STAKE
-        | MARINADE_VOTER_STAKE_REGISTRY
-        | MARINADE_NATIVE_STAKING_PROXY => Some("Marinade".to_string()),
-
-        _ => None,
+  match program_str.as_str() {
+    // Raydium
+    RAYDIUM_CPMM | RAYDIUM_LEGACY_AMM | RAYDIUM_CLMM | RAYDIUM_STABLE | RAYDIUM_ROUTING => {
+      Some("Raydium".to_string())
     }
+
+    // Orca
+    ORCA_WHIRLPOOL => Some("Orca".to_string()),
+
+    // Jupiter
+    JUPITER_SWAP
+    | JUPITER_PERPETUALS
+    | JUPITER_REFERRAL
+    | JUPITER_DOVES
+    | JUPITER_LEND_EARN
+    | JUPITER_LEND_BORROW
+    | JUPITER_LEND_EARN_REWARDS
+    | JUPITER_LEND_LIQUIDITY
+    | JUPITER_LEND_BORROW_ORACLE
+    | JUPITER_LIMIT_ORDER_V2
+    | JUPITER_DCA
+    | JUPITER_LOCK
+    | JUPITER_GOVERNANCE
+    | JUPITER_VOTER => Some("Jupiter".to_string()),
+
+    // Drift
+    DRIFT_V2 => Some("Drift".to_string()),
+
+    // Kamino
+    KAMINO_LEND | KAMINO_LIQUIDITY | KAMINO_VAULTS => Some("Kamino".to_string()),
+
+    // Meteora
+    METEORA_DLMM
+    | METEORA_DAMM_V2
+    | METEORA_DBC
+    | METEORA_PRESALE_VAULT
+    | METEORA_ALPHA_VAULT
+    | METEORA_DYNAMIC_FEE_SHARING
+    | METEORA_ZAP
+    | METEORA_DAMM_V1
+    | METEORA_DYNAMIC_VAULT
+    | METEORA_STAKE2EARN
+    | METEORA_FARM
+    | METEORA_MERCURIAL_STABLE_SWAP => Some("Meteora".to_string()),
+
+    // Pump.fun
+    PUMP_PROGRAM | PUMP_AMM | PUMP_FEES => Some("Pump.fun".to_string()),
+
+    // Marinade
+    MARINADE_LIQUID_STAKING
+    | MARINADE_SPL_GOVERNANCE
+    | MARINADE_TOKADAPT
+    | MARINADE_ESCROW_RELOCKER
+    | MARINADE_VALIDATOR_GAUGES
+    | MARINADE_LIQUIDITY_GAUGES
+    | MARINADE_REFERRAL
+    | MARINADE_DIRECTED_STAKE
+    | MARINADE_VOTER_STAKE_REGISTRY
+    | MARINADE_NATIVE_STAKING_PROXY => Some("Marinade".to_string()),
+
+    _ => None,
+  }
 }

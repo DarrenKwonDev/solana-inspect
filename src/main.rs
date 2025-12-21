@@ -1,3 +1,3 @@
 fn main() {
-    println!("no main");
+  println!("no main");
 }

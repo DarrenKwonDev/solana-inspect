@@ -1,5 +1,5 @@
 edition = "2021"
 
-tab_width = 2
+hard_tabs = false
+tab_spaces = 2
 match_block_trailing_comma = false
-fn_single_line = false
