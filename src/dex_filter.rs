@@ -68,6 +68,15 @@ pub const MARINADE_DIRECTED_STAKE: &str = "dstK1PDHNoKN9MdmftRzsEbXP5T1FTBiQBm1E
 pub const MARINADE_VOTER_STAKE_REGISTRY: &str = "VoteMBhDCqGLRgYpp9o7DGyq81KNmwjXQRAHStjtJsS";
 pub const MARINADE_NATIVE_STAKING_PROXY: &str = "mnspJQyF1KdDEs5c6YJPocYdY1esBgVQFufM2dY9oDk";
 
+pub fn is_swap(program_id: &Pubkey) -> Option<String> {
+    let program_str = program_id.to_string();
+
+    match program_str.as_str() {
+        RAYDIUM_CLMM | RAYDIUM_LEGACY_AMM | RAYDIUM_CPMM => Some("Raydium".to_string()),
+        _ => None,
+    }
+}
+
 pub fn is_dex_program(program_id: &Pubkey) -> Option<String> {
     let program_str = program_id.to_string();
 

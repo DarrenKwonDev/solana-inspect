@@ -1,7 +1,13 @@
+use std::str::FromStr;
+
 use anyhow::Result;
 use futures_util::StreamExt;
 use solana_client::rpc_config::RpcBlockConfig;
-use solana_inspect::client;
+use solana_inspect::{
+    client,
+    dex_filter::{self},
+};
+use solana_sdk::pubkey::Pubkey;
 use solana_transaction_status::{TransactionDetails, UiConfirmedBlock, UiTransactionEncoding};
 
 #[tokio::main]
@@ -15,17 +21,14 @@ async fn main() -> Result<()> {
     // ---------------------------------
     // vars
     // ---------------------------------
-    let rpc = client::rpc();
+    let _rpc = client::rpc();
     let pubsub = client::pubsub();
-    const SLOT_OFFSET: u64 = 30; // you can't see block inner data as soon as receive slot update.
+    const SLOT_OFFSET: u64 = 35; // you can't see block inner data as soon as receive slot update.
 
     // ---------------------------------
     // parse previous block
-    // 아래 코드는 slot이 400ms 단위로 업데이트 되며, 일반적으로 single core에서 핸들링하기에 충분하다.
+    // 모든 tx를 분석한다는 목표라면 slot_subscribe + get_block 조합 사용하는 것이 나은 듯.
     // ---------------------------------
-    // 모든 tx를 분석한다는 목표라면
-    // slot_subscribe + get_block 조합 사용하는 것이 좋음
-    // get_slot이 반환하는 slot은 최신이 아닐 수 있다. RPC 지연이 크면 이전 슬롯을 줄수도 있다.
     let (mut slot_receiver, _unsub) = pubsub.slot_subscribe().await?;
 
     while let Some(slot_update) = slot_receiver.next().await {
@@ -34,7 +37,7 @@ async fn main() -> Result<()> {
 
         match get_block_by(slot - SLOT_OFFSET).await {
             Ok(block) => {
-                println!("blockhash {}", block.blockhash)
+                parse_tx_in_block(&block);
             }
             Err(e) => {
                 eprintln!("error {}", e)
@@ -43,6 +46,49 @@ async fn main() -> Result<()> {
     }
 
     Ok(())
+}
+
+fn parse_tx_in_block(block: &UiConfirmedBlock) {
+    if let Some(txs) = &block.transactions {
+        for tx_meta in txs.iter() {
+            match &tx_meta.transaction {
+                solana_transaction_status::EncodedTransaction::Json(tx) => match &tx.message {
+                    solana_transaction_status::UiMessage::Parsed(ui_parsed_message) => {
+                        for instr in ui_parsed_message.instructions.iter() {
+                            match instr {
+                                solana_transaction_status::UiInstruction::Parsed(
+                                    ui_parsed_instruction,
+                                ) => {
+                                    match &ui_parsed_instruction {
+                                            solana_transaction_status::UiParsedInstruction::Parsed(parsed_instruction) => {
+                                                if let Ok(pubkey) = Pubkey::from_str(&parsed_instruction.program_id) {
+                                                    if dex_filter::is_swap(&pubkey).is_some() {
+                                                        dbg!(parsed_instruction);
+                                                    }
+                                                }
+                                            },
+                                            solana_transaction_status::UiParsedInstruction::PartiallyDecoded(ui_partially_decoded_instruction) => {
+                                                if let Ok(pubkey) = Pubkey::from_str(&ui_partially_decoded_instruction.program_id) {
+
+                                                    if dex_filter::is_swap(&pubkey).is_some() {
+                                                        dbg!(ui_partially_decoded_instruction);
+                                                    }
+                                                }
+                                            },
+                                        }
+                                }
+                                _ => {}
+                            }
+                        }
+                    }
+                    _ => {}
+                },
+                _ => {}
+            }
+
+            // panic!("intentional panic");
+        }
+    }
 }
 
 async fn get_block_by(slot: u64) -> Result<UiConfirmedBlock> {
