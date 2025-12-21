@@ -9,8 +9,8 @@ cli for inspect solana blockchain
 ## tools 
 - [x] rpc_check   
 - [x] dex_count   
-- [ ] idl_parse
-  - print instruction's descriminator, args 
+- [x] idl_parse
+  - print instruction's name and descriminator
 - [ ] swap_watch
   - swap pool을 소유한 곳만 대상 (raydium, meteora, orca)
   - aggregator(jupyter, okx dex)와 aggregator를 대상으로 한 private pool(solfi) 등은 제외 
