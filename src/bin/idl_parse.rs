@@ -4,6 +4,8 @@ use anyhow::Result;
 use serde_json::Value;
 use sha2::{Digest, Sha256};
 
+use solana_inspect::{GREEN, MAGENTA, RESET};
+
 fn main() {
     let args: Vec<String> = std::env::args().collect();
     if args.len() < 2 {
@@ -54,20 +56,14 @@ fn process_file(path_str: &str) -> Result<()> {
         for instr in instructions {
             let name = instr["name"].as_str().unwrap_or("unknown");
             let discriminator = calculate_discriminator(name);
-            println!("{:?} {:?}", name, discriminator);
+            let encoded = bs58::encode(&discriminator).into_string();
+
+            println!(
+                "fn {MAGENTA}{}{RESET} => {GREEN}{}{RESET} {:?}",
+                name, encoded, discriminator
+            );
         }
     }
-
-    // if let Some(errors) = idl["errors"].as_array() {
-    //     if !errors.is_empty() {
-    //         for err_code in errors {
-    //             let code = err_code["code"].as_u64().unwrap_or(0) as u32;
-    //             let name = err_code["name"].as_str().unwrap_or("unknown");
-    //             let msg = err_code["msg"].as_str().unwrap_or("unknown");
-    //             println!("{} {} ({})", code, name, msg);
-    //         }
-    //     }
-    // }
 
     Ok(())
 }
