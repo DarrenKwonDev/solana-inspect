@@ -1,5 +1,6 @@
 pub mod client;
 pub mod dex_filter;
+pub mod protocols;
 
 pub const GREEN: &str = "\x1b[32m";
 pub const MAGENTA: &str = "\x1b[35m";

@@ -5,7 +5,10 @@ use futures_util::StreamExt;
 use solana_client::rpc_config::RpcBlockConfig;
 use solana_inspect::{
   client,
-  dex_filter::{self},
+  dex_filter::{self, RAYDIUM_CLMM, RAYDIUM_CPMM, RAYDIUM_LEGACY_AMM},
+  protocols::raydium::{
+    amm::handle_raydium_amm_instr, clmm::handle_raydium_clmm_instr, cpmm::handle_raydium_cpmm_instr,
+  },
 };
 use solana_sdk::pubkey::Pubkey;
 use solana_transaction_status::{TransactionDetails, UiConfirmedBlock, UiTransactionEncoding};
@@ -37,7 +40,7 @@ async fn main() -> Result<()> {
 
     match get_block_by(slot - SLOT_OFFSET).await {
       Ok(block) => {
-        parse_tx_in_block(&block);
+        let _ = parse_tx_in_block(&block);
       }
       Err(e) => {
         eprintln!("error {}", e)
@@ -48,7 +51,7 @@ async fn main() -> Result<()> {
   Ok(())
 }
 
-fn parse_tx_in_block(block: &UiConfirmedBlock) {
+fn parse_tx_in_block(block: &UiConfirmedBlock) -> anyhow::Result<()> {
   if let Some(txs) = &block.transactions {
     for tx_meta in txs.iter() {
       match &tx_meta.transaction {
@@ -58,24 +61,29 @@ fn parse_tx_in_block(block: &UiConfirmedBlock) {
               match instr {
                 solana_transaction_status::UiInstruction::Parsed(ui_parsed_instruction) => {
                   match &ui_parsed_instruction {
+                    // known instruction
                     solana_transaction_status::UiParsedInstruction::Parsed(parsed_instruction) => {
                       if let Ok(pubkey) = Pubkey::from_str(&parsed_instruction.program_id) {
                         if dex_filter::is_swap(&pubkey).is_some() {
-                          dbg!(parsed_instruction);
+                          // dbg!(parsed_instruction);
                         }
                       }
                     }
+                    // custom instruction made by program
                     solana_transaction_status::UiParsedInstruction::PartiallyDecoded(
                       ui_partially_decoded_instruction,
-                    ) => {
-                      if let Ok(pubkey) =
-                        Pubkey::from_str(&ui_partially_decoded_instruction.program_id)
-                      {
-                        if dex_filter::is_swap(&pubkey).is_some() {
-                          dbg!(ui_partially_decoded_instruction);
-                        }
+                    ) => match ui_partially_decoded_instruction.program_id.as_str() {
+                      RAYDIUM_LEGACY_AMM => {
+                        handle_raydium_amm_instr(ui_partially_decoded_instruction);
                       }
-                    }
+                      RAYDIUM_CPMM => {
+                        handle_raydium_cpmm_instr(ui_partially_decoded_instruction);
+                      }
+                      RAYDIUM_CLMM => {
+                        handle_raydium_clmm_instr(ui_partially_decoded_instruction);
+                      }
+                      _ => {}
+                    },
                   }
                 }
                 _ => {}
@@ -90,6 +98,7 @@ fn parse_tx_in_block(block: &UiConfirmedBlock) {
       // panic!("intentional panic");
     }
   }
+  Ok(())
 }
 
 async fn get_block_by(slot: u64) -> Result<UiConfirmedBlock> {
