@@ -51,7 +51,7 @@ pub const METEORA_STAKE2EARN: &str = "FEESngU3neckdwib9X3KWqdL7Mjmqk9XNp3uh5JbP4
 pub const METEORA_FARM: &str = "FarmuwXPWXvefWUeqFAa5w6rifLkq5X6E8bimYvrhCB1";
 pub const METEORA_MERCURIAL_STABLE_SWAP: &str = "MERLuDFBMmsHnsBPZw2sDQZHvXFMwp8EdjudcU2HKky";
 
-// https://solana.stackexchange.com/questions/16485/pump-dot-fun-official-program-ids
+// pump.fun
 pub const PUMP_PROGRAM: &str = "6EF8rrecthR5Dkzon8Nwu78hRvfCKubJ14M5uBEwF6P";
 pub const PUMP_AMM: &str = "pAMMBay6oceH9fJKBRHGP5D4bD4sWpmSwMn52FMfXEA";
 pub const PUMP_FEES: &str = "pfeeUxB6jkeY1Hxd7CsFCAjcbHA9rWtchMGdZ6VojVZ";

@@ -1,9 +1,10 @@
-use std::str::FromStr;
+use std::{collections::HashMap, env, str::FromStr, sync::Arc};
 
 use anyhow::Result;
 use futures_util::StreamExt;
 use solana_client::rpc_config::RpcBlockConfig;
 use solana_inspect::{
+  api_cache::{Cache, token::TokenMetadata},
   client,
   dex_filter::{self, RAYDIUM_CLMM, RAYDIUM_CPMM, RAYDIUM_LEGACY_AMM},
   protocols::raydium::{
@@ -19,6 +20,8 @@ async fn main() -> Result<()> {
   // setup
   // ---------------------------------
   dotenv::dotenv().ok();
+
+  // rpc, pubsub
   client::init_clients().await?;
 
   // ---------------------------------

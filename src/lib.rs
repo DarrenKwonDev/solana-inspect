@@ -1,3 +1,4 @@
+pub mod api_cache;
 pub mod client;
 pub mod dex_filter;
 pub mod protocols;

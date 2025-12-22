@@ -1,7 +1,7 @@
 use anyhow::{Result, anyhow};
 use solana_transaction_status::UiPartiallyDecodedInstruction;
 
-use crate::{MAGENTA, RESET};
+use crate::{MAGENTA, RESET, api_cache::raydium_amm_api::oh};
 
 /*
   amm protocol codes : https://github.com/raydium-io/raydium-amm
@@ -52,8 +52,26 @@ pub fn handle_raydium_amm_instr(instr: &UiPartiallyDecodedInstruction) -> Result
           pub minimum_amount_out: u64,
         }
 
-          ///   1. `[writable]` AMM Account
-          ///   17. `[signer]` User wallet Account
+
+        ///   0. `[]` Spl Token program id
+        ///   1. `[writable]` AMM Account
+        ///   2. `[]` $authority derived from `create_program_address(&[AUTHORITY_AMM, &[nonce]])`.
+        ///   3. `[writable]` AMM open orders Account
+        ///   4. `[writable]` (optional)AMM target orders Account, no longer used in the contract, recommended no need to add this Account.
+        ///   5. `[writable]` AMM coin vault Account to swap FROM or To.
+        ///   6. `[writable]` AMM pc vault Account to swap FROM or To.
+        ///   7. `[]` Market program id
+        ///   8. `[writable]` Market Account. Market program is the owner.
+        ///   9. `[writable]` Market bids Account
+        ///   10. `[writable]` Market asks Account
+        ///   11. `[writable]` Market event queue Account
+        ///   12. `[writable]` Market coin vault Account
+        ///   13. `[writable]` Market pc vault Account
+        ///   14. '[]` Market vault signer Account
+        ///   15. `[writable]` User source token Account.
+        ///   16. `[writable]` User destination token Account.
+        ///   17. `[signer]` User wallet Account
+
         */
 
         let (amount_in, rest) = unpack_u64(rest).unwrap();
@@ -63,10 +81,12 @@ pub fn handle_raydium_amm_instr(instr: &UiPartiallyDecodedInstruction) -> Result
         let amm_account = instr.accounts.get(1).map(|s| s.as_str());
 
         println!(
-          "{MAGENTA}[Raydium] | SwapBaseIn | {} | {}{RESET}",
+          "{MAGENTA}[Raydium] AMM | SwapBaseIn | {} | pool {}{RESET}",
           amount_in,
           amm_account.unwrap_or("?")
         );
+
+        oh();
       }
       11 => {
         /*
