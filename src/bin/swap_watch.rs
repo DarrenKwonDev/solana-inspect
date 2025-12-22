@@ -74,13 +74,15 @@ fn parse_tx_in_block(block: &UiConfirmedBlock) -> anyhow::Result<()> {
                       ui_partially_decoded_instruction,
                     ) => match ui_partially_decoded_instruction.program_id.as_str() {
                       RAYDIUM_LEGACY_AMM => {
-                        handle_raydium_amm_instr(ui_partially_decoded_instruction);
+                        if let Err(e) = handle_raydium_amm_instr(ui_partially_decoded_instruction) {
+                          eprintln!("{e}");
+                        }
                       }
                       RAYDIUM_CPMM => {
-                        handle_raydium_cpmm_instr(ui_partially_decoded_instruction);
+                        // handle_raydium_cpmm_instr(ui_partially_decoded_instruction);
                       }
                       RAYDIUM_CLMM => {
-                        handle_raydium_clmm_instr(ui_partially_decoded_instruction);
+                        // handle_raydium_clmm_instr(ui_partially_decoded_instruction);
                       }
                       _ => {}
                     },
