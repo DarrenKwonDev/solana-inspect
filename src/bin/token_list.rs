@@ -1,7 +1,10 @@
 use anyhow::Result;
 use solana_inspect::{
   CACHE_TOKEN_FILE_NAME,
-  api_cache::{Cache, get_cache_dir, token::TokenMetadataMap},
+  fetcher::{
+    cache::{Cache, get_cache_dir},
+    token::TokenMetadataMap,
+  },
 };
 use std::sync::Arc;
 
@@ -15,6 +18,10 @@ async fn main() -> Result<()> {
   ));
 
   let _ = token_cache.load();
+
+  // fetch jup verfied
+
+  // save into file
 
   Ok(())
 }

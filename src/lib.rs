@@ -1,6 +1,6 @@
-pub mod api_cache;
 pub mod client;
 pub mod dex_filter;
+pub mod fetcher;
 pub mod protocols;
 
 pub const CACHE_TOKEN_FILE_NAME: &str = "tokens.json";
