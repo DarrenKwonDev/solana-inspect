@@ -3,8 +3,9 @@ pub mod token;
 
 use std::{collections::HashMap, fs, path::PathBuf};
 
-use anyhow::Result;
+use anyhow::{Result, anyhow};
 use dashmap::DashMap;
+use directories::ProjectDirs;
 use serde::{Deserialize, Serialize};
 
 type BoxedFuture<T> = std::pin::Pin<Box<dyn std::future::Future<Output = T> + Send>>;
@@ -75,5 +76,15 @@ impl<T: Clone + Send + Sync + 'static + Serialize> Cache<T> {
       self.memory.insert(key, value);
     }
     Ok(())
+  }
+}
+
+pub fn get_cache_dir() -> Result<PathBuf> {
+  if let Some(proj_dirs) = ProjectDirs::from("", "", env!("CARGO_PKG_NAME")) {
+    let cache_dir = proj_dirs.cache_dir().to_path_buf();
+    fs::create_dir_all(&cache_dir)?;
+    Ok(cache_dir)
+  } else {
+    Err(anyhow!("failed to get cache dir"))
   }
 }

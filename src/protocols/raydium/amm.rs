@@ -1,7 +1,7 @@
 use anyhow::{Result, anyhow};
 use solana_transaction_status::UiPartiallyDecodedInstruction;
 
-use crate::{MAGENTA, RESET, api_cache::raydium_amm_api::oh};
+use crate::{MAGENTA, RESET};
 
 /*
   amm protocol codes : https://github.com/raydium-io/raydium-amm
@@ -85,8 +85,6 @@ pub fn handle_raydium_amm_instr(instr: &UiPartiallyDecodedInstruction) -> Result
           amount_in,
           amm_account.unwrap_or("?")
         );
-
-        oh();
       }
       11 => {
         /*
