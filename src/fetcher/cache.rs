@@ -5,8 +5,6 @@ use dashmap::DashMap;
 use directories::ProjectDirs;
 use serde::{Deserialize, Serialize};
 
-type BoxedFuture<T> = std::pin::Pin<Box<dyn std::future::Future<Output = T> + Send>>;
-
 // api call의 결과 외에도 계산 결과 저장도 겸임
 pub struct Cache<T> {
   memory: DashMap<String, T>,
@@ -22,11 +20,13 @@ impl<T: Clone + Send + Sync + 'static + Serialize> Cache<T> {
   }
 
   // memory cache failed, disk hit
-  pub async fn get<F>(&self, key: &str, fetch_fn: F) -> Result<T>
+  pub async fn get<F, Fut>(&self, key: &str, fetch_fn: F) -> Result<T>
   where
-    F: FnOnce() -> BoxedFuture<Result<T>>,
+    F: FnOnce() -> Fut,
+    Fut: Future<Output = Result<T>>,
   {
     if let Some(entry) = self.memory.get(key) {
+      dbg!(format!("🔴 {key} cache hit!"));
       return Ok(entry.clone());
     }
     let value = fetch_fn().await?;
@@ -67,7 +67,6 @@ impl<T: Clone + Send + Sync + 'static + Serialize> Cache<T> {
       return Ok(());
     }
 
-    let data = std::fs::read_to_string(&self.storage_path)?;
     let cached: HashMap<String, T> = serde_json::from_str(&data)?;
     for (key, value) in cached {
       self.memory.insert(key, value);

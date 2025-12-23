@@ -12,10 +12,10 @@ cli for inspect solana blockchain
 - [x] idl_parse
   - print instruction's name and descriminator in anchor convention
   - ⚠️ Caution! Some projects (e.g., Raydium AMM) were not built with the Anchor framework. In those cases, parsing the IDL is pointless—you should look at their source code instead.
-- [ ] token_list
+- [x] token_list
 - [ ] swap_watch
   - swap pool을 소유한 곳만 대상 (raydium, meteora, orca, pump)
-  - aggregator(jupyter, okx dex)와 aggregator를 대상으로 한 private pool(solfi) 등은 제외 
+  - aggregator(jupiter, okx dex)와 aggregator를 대상으로 한 private pool(solfi) 등은 제외 
 
 ## can I handle solana data in single core? do napkin math. 
 
@@ -40,3 +40,8 @@ yes
   - despite a severely conservative assumption (IPC = 4, memory read 250 μs), can handle data!
   - but, in logics, deserialization -> signal process -> trigger action should below 400ms.
   - may signal processing takes more time, then you should copy and offload to queue or something.
+
+## known issues
+
+- Cache files can be polluted due to race conditions. Currently, this project assumes the CLI is executed one at a time.
+
