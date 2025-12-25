@@ -32,6 +32,7 @@ pub fn handle_raydium_amm_instr(
   tx_meta: &EncodedTransactionWithStatusMeta,
   token_cache: TokenCacheType,
 ) -> Result<()> {
+  // decode instruction
   let decoded = bs58::decode(&instr.data).into_vec()?;
   if decoded.is_empty() {
     return Ok(());
@@ -54,6 +55,12 @@ pub fn handle_raydium_amm_instr(
         // println!("WithdrawPnl")
       }
       9 => {
+        // -------------------------------
+        // caches
+        let _token_map = token_cache.get(TOKEN_ALL_KEY)?;
+
+        // -------------------------------
+        // parse logic
         let (amount_in, _rest) = unpack_u64(rest).unwrap();
 
         let amm_account = instr.accounts.get(1).map(|s| s.as_str());

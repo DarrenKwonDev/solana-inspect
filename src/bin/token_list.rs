@@ -2,6 +2,7 @@ use anyhow::Result;
 use solana_inspect::{
   CACHE_TOKEN_FILE_NAME,
   fetcher::{
+    TOKEN_ALL_KEY,
     cache::{Cache, get_cache_dir},
     jupyter_api::{TokenMetadata, TokenTagType, fetch_token_all},
   },
@@ -32,7 +33,7 @@ async fn main() -> Result<()> {
   // logics
   // ---------------------------------
   let token_map = token_cache
-    .get("token:all", || fetch_token_all(TokenTagType::Vrfd))
+    .get_or_fetch(TOKEN_ALL_KEY, || fetch_token_all(TokenTagType::Vrfd))
     .await?;
 
   for (_, token) in token_map.iter() {

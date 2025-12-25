@@ -17,7 +17,7 @@ pub type TokenCacheType = Arc<Cache<HashMap<String, TokenMetadata>>>;
 // -------------------------------
 // api call의 결과 외에도 계산 결과 저장도 겸임
 pub struct Cache<T> {
-  memory: DashMap<String, T>,
+  memory: DashMap<String, T>, // memory를 직접 노출하지 않는게 원칙임
   storage_path: PathBuf,
 }
 
@@ -30,7 +30,7 @@ impl<T: Clone + Send + Sync + 'static + Serialize> Cache<T> {
   }
 
   // memory cache failed, disk hit
-  pub async fn get<F, Fut>(&self, key: &str, fetch_fn: F) -> Result<T>
+  pub async fn get_or_fetch<F, Fut>(&self, key: &str, fetch_fn: F) -> Result<T>
   where
     F: FnOnce() -> Fut,
     Fut: Future<Output = Result<T>>,
@@ -42,6 +42,14 @@ impl<T: Clone + Send + Sync + 'static + Serialize> Cache<T> {
     let value = fetch_fn().await?;
     self.memory.insert(key.to_string(), value.clone());
     Ok(value)
+  }
+
+  pub fn get(&self, key: &str) -> Result<T> {
+    self
+      .memory
+      .get(key)
+      .map(|entry| entry.value().clone())
+      .ok_or_else(|| anyhow!("key '{}' not found in cache", key))
   }
 
   // 수동으로 메모리 overwrite
@@ -60,6 +68,16 @@ impl<T: Clone + Send + Sync + 'static + Serialize> Cache<T> {
     let json: _ = serde_json::to_string_pretty(&map)?;
     fs::write(&self.storage_path, json)?;
 
+    Ok(())
+  }
+
+  pub fn persist_if<F>(&self, condition: F) -> Result<()>
+  where
+    F: FnOnce() -> bool,
+  {
+    if condition() {
+      self.persist()?;
+    }
     Ok(())
   }
 
