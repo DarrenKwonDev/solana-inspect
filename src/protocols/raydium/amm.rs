@@ -1,6 +1,6 @@
 use anyhow::{Result, anyhow};
 use solana_transaction_status::{
-  EncodedTransactionWithStatusMeta, UiPartiallyDecodedInstruction,
+  EncodedTransactionWithStatusMeta, UiPartiallyDecodedInstruction, UiTransactionStatusMeta,
   option_serializer::OptionSerializer,
 };
 
@@ -29,7 +29,7 @@ use crate::{
 
 pub fn handle_raydium_amm_instr(
   instr: &UiPartiallyDecodedInstruction,
-  tx_meta: &EncodedTransactionWithStatusMeta,
+  tx_meta: &Option<UiTransactionStatusMeta>,
   token_cache: TokenCacheType,
 ) -> Result<()> {
   // decode instruction
@@ -55,6 +55,29 @@ pub fn handle_raydium_amm_instr(
         // println!("WithdrawPnl")
       }
       9 => {
+        /*
+        /// Swap coin or pc from pool, base amount_in with a slippage of minimum_amount_out
+        ///
+        ///   0. `[]` Spl Token program id
+        ///   1. `[writable]` AMM Account
+        ///   2. `[]` $authority derived from `create_program_address(&[AUTHORITY_AMM, &[nonce]])`.
+        ///   3. `[writable]` AMM open orders Account
+        ///   4. `[writable]` (optional)AMM target orders Account, no longer used in the contract, recommended no need to add this Account.
+        ///   5. `[writable]` AMM coin vault Account to swap FROM or To.
+        ///   6. `[writable]` AMM pc vault Account to swap FROM or To.
+        ///   7. `[]` Market program id
+        ///   8. `[writable]` Market Account. Market program is the owner.
+        ///   9. `[writable]` Market bids Account
+        ///   10. `[writable]` Market asks Account
+        ///   11. `[writable]` Market event queue Account
+        ///   12. `[writable]` Market coin vault Account
+        ///   13. `[writable]` Market pc vault Account
+        ///   14. '[]` Market vault signer Account
+        ///   15. `[writable]` User source token Account.
+        ///   16. `[writable]` User destination token Account.
+        ///   17. `[signer]` User wallet Account
+        SwapBaseIn(SwapInstructionBaseIn),
+          */
         // -------------------------------
         // caches
         let _token_map = token_cache.get(TOKEN_ALL_KEY)?;
@@ -63,11 +86,20 @@ pub fn handle_raydium_amm_instr(
         // parse logic
         let (amount_in, _rest) = unpack_u64(rest).unwrap();
 
+        dbg!(tx_meta);
+
         let amm_account = instr.accounts.get(1).map(|s| s.as_str());
+        let user_source_token_account = instr.accounts.get(15).map(|s| s.as_str());
+        let user_dest_token_account = instr.accounts.get(16).map(|s| s.as_str());
+        for (idx, addr) in instr.accounts.iter().enumerate() {
+          println!("[{}] {}", idx, addr);
+        }
 
         println!(
-          "{MAGENTA}[Raydium] AMM | SwapBaseIn | {} | pool {}{RESET}",
+          "{MAGENTA}[Raydium] AMM | SwapBaseIn | {} | {} -> {} | pool {}{RESET}",
           amount_in,
+          user_source_token_account.unwrap(),
+          user_dest_token_account.unwrap(),
           amm_account.unwrap_or("?")
         );
       }

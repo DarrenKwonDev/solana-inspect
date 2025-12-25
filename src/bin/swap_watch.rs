@@ -71,11 +71,36 @@ async fn main() -> Result<()> {
 
 fn parse_tx_in_block(block: &UiConfirmedBlock, token_cache: TokenCacheType) -> anyhow::Result<()> {
   if let Some(txs) = &block.transactions {
-    for tx_meta in txs.iter() {
-      match &tx_meta.transaction {
+    // -------------------------------------------
+    // tx + meta
+    for tx_with_meta in txs.iter() {
+      // -------------------------------------------
+      // err early return
+      // -------------------------------------------
+      // meta 기준으로 실패한 tx는 고려하지 않는다.
+      let meta = match &tx_with_meta.meta {
+        Some(m) => m,
+        None => continue, // meta 없으면 문제있는 tx
+      };
+
+      if meta.err.is_some() {
+        continue; // 실패한 TX는 처리 안 함
+      }
+
+      // -------------------------------------------
+      // tx parse logic
+      // -------------------------------------------
+      // tx + meta에서 tx를 기준으로 분기하고 내부적으로 Optional한 meta데이터를 처리하는 패턴
+      match &tx_with_meta.transaction {
+        // -------------------------------------------
+        // encoding에 따라 넘어오는 타입이 다름
         solana_transaction_status::EncodedTransaction::Json(tx) => match &tx.message {
           solana_transaction_status::UiMessage::Parsed(ui_parsed_message) => {
+            // -------------------------------------------
+            // single tx has many instructions
             for instr in ui_parsed_message.instructions.iter() {
+              // -------------------------------------------
+              // instruction is parsed or partially parsed
               match instr {
                 solana_transaction_status::UiInstruction::Parsed(ui_parsed_instruction) => {
                   match &ui_parsed_instruction {
@@ -94,7 +119,7 @@ fn parse_tx_in_block(block: &UiConfirmedBlock, token_cache: TokenCacheType) -> a
                       RAYDIUM_LEGACY_AMM => {
                         if let Err(e) = handle_raydium_amm_instr(
                           ui_partially_decoded_instruction,
-                          tx_meta,
+                          &tx_with_meta.meta,
                           token_cache.clone(),
                         ) {
                           eprintln!("{e}");
@@ -118,8 +143,6 @@ fn parse_tx_in_block(block: &UiConfirmedBlock, token_cache: TokenCacheType) -> a
         },
         _ => {}
       }
-
-      // panic!("intentional panic");
     }
   }
   Ok(())
