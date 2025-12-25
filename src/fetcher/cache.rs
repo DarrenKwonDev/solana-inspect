@@ -1,10 +1,20 @@
-use std::{collections::HashMap, fs, path::PathBuf};
+use std::{collections::HashMap, fs, path::PathBuf, sync::Arc};
 
 use anyhow::{Result, anyhow};
 use dashmap::DashMap;
 use directories::ProjectDirs;
 use serde::{Deserialize, Serialize};
 
+use crate::fetcher::jupyter_api::TokenMetadata;
+
+// -------------------------------
+// cache type
+// -------------------------------
+pub type TokenCacheType = Arc<Cache<HashMap<String, TokenMetadata>>>;
+
+// -------------------------------
+// cache implementation
+// -------------------------------
 // api call의 결과 외에도 계산 결과 저장도 겸임
 pub struct Cache<T> {
   memory: DashMap<String, T>,

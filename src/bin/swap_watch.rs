@@ -1,15 +1,16 @@
-use std::{collections::HashMap, env, str::FromStr, sync::Arc};
+use std::{collections::HashMap, str::FromStr, sync::Arc};
 
 use anyhow::Result;
 use futures_util::StreamExt;
 use solana_client::rpc_config::RpcBlockConfig;
 use solana_inspect::{
-  api_cache::{Cache, token::TokenMetadata},
-  client,
+  CACHE_TOKEN_FILE_NAME, client,
   dex_filter::{self, RAYDIUM_CLMM, RAYDIUM_CPMM, RAYDIUM_LEGACY_AMM},
-  protocols::raydium::{
-    amm::handle_raydium_amm_instr, clmm::handle_raydium_clmm_instr, cpmm::handle_raydium_cpmm_instr,
+  fetcher::{
+    cache::{Cache, TokenCacheType, get_cache_dir},
+    jupyter_api::TokenMetadata,
   },
+  protocols::raydium::amm::handle_raydium_amm_instr,
 };
 use solana_sdk::pubkey::Pubkey;
 use solana_transaction_status::{TransactionDetails, UiConfirmedBlock, UiTransactionEncoding};
@@ -23,6 +24,18 @@ async fn main() -> Result<()> {
 
   // rpc, pubsub
   client::init_clients().await?;
+
+  // ----------------------
+  // api cache layer setup
+  // ----------------------
+  let cache_dir = get_cache_dir()?;
+  println!("{:?}", cache_dir);
+
+  let token_cache: TokenCacheType = Arc::new(Cache::<HashMap<String, TokenMetadata>>::new(
+    cache_dir.join(CACHE_TOKEN_FILE_NAME),
+  ));
+
+  let _ = token_cache.load();
 
   // ---------------------------------
   // vars
@@ -43,7 +56,7 @@ async fn main() -> Result<()> {
 
     match get_block_by(slot - SLOT_OFFSET).await {
       Ok(block) => {
-        let _ = parse_tx_in_block(&block);
+        let _ = parse_tx_in_block(&block, token_cache.clone());
       }
       Err(e) => {
         eprintln!("error {}", e)
@@ -51,10 +64,12 @@ async fn main() -> Result<()> {
     }
   }
 
+  token_cache.persist()?;
+
   Ok(())
 }
 
-fn parse_tx_in_block(block: &UiConfirmedBlock) -> anyhow::Result<()> {
+fn parse_tx_in_block(block: &UiConfirmedBlock, token_cache: TokenCacheType) -> anyhow::Result<()> {
   if let Some(txs) = &block.transactions {
     for tx_meta in txs.iter() {
       match &tx_meta.transaction {
@@ -77,7 +92,11 @@ fn parse_tx_in_block(block: &UiConfirmedBlock) -> anyhow::Result<()> {
                       ui_partially_decoded_instruction,
                     ) => match ui_partially_decoded_instruction.program_id.as_str() {
                       RAYDIUM_LEGACY_AMM => {
-                        if let Err(e) = handle_raydium_amm_instr(ui_partially_decoded_instruction) {
+                        if let Err(e) = handle_raydium_amm_instr(
+                          ui_partially_decoded_instruction,
+                          tx_meta,
+                          token_cache.clone(),
+                        ) {
                           eprintln!("{e}");
                         }
                       }

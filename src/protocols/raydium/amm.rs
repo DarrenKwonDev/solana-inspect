@@ -1,7 +1,13 @@
 use anyhow::{Result, anyhow};
-use solana_transaction_status::UiPartiallyDecodedInstruction;
+use solana_transaction_status::{
+  EncodedTransactionWithStatusMeta, UiPartiallyDecodedInstruction,
+  option_serializer::OptionSerializer,
+};
 
-use crate::{MAGENTA, RESET};
+use crate::{
+  MAGENTA, RESET,
+  fetcher::{TOKEN_ALL_KEY, cache::TokenCacheType},
+};
 
 /*
   amm protocol codes : https://github.com/raydium-io/raydium-amm
@@ -21,7 +27,11 @@ use crate::{MAGENTA, RESET};
    하지만 직접적인 swap이 1차적으로 중요
 */
 
-pub fn handle_raydium_amm_instr(instr: &UiPartiallyDecodedInstruction) -> Result<()> {
+pub fn handle_raydium_amm_instr(
+  instr: &UiPartiallyDecodedInstruction,
+  tx_meta: &EncodedTransactionWithStatusMeta,
+  token_cache: TokenCacheType,
+) -> Result<()> {
   let decoded = bs58::decode(&instr.data).into_vec()?;
   if decoded.is_empty() {
     return Ok(());
@@ -44,40 +54,8 @@ pub fn handle_raydium_amm_instr(instr: &UiPartiallyDecodedInstruction) -> Result
         // println!("WithdrawPnl")
       }
       9 => {
-        /*
-        pub struct SwapInstructionBaseIn {
-          // SOURCE amount to transfer, output to DESTINATION is based on the exchange rate
-          pub amount_in: u64,
-          // Minimum amount of DESTINATION token to output, prevents excessive slippage
-          pub minimum_amount_out: u64,
-        }
+        let (amount_in, _rest) = unpack_u64(rest).unwrap();
 
-
-        ///   0. `[]` Spl Token program id
-        ///   1. `[writable]` AMM Account
-        ///   2. `[]` $authority derived from `create_program_address(&[AUTHORITY_AMM, &[nonce]])`.
-        ///   3. `[writable]` AMM open orders Account
-        ///   4. `[writable]` (optional)AMM target orders Account, no longer used in the contract, recommended no need to add this Account.
-        ///   5. `[writable]` AMM coin vault Account to swap FROM or To.
-        ///   6. `[writable]` AMM pc vault Account to swap FROM or To.
-        ///   7. `[]` Market program id
-        ///   8. `[writable]` Market Account. Market program is the owner.
-        ///   9. `[writable]` Market bids Account
-        ///   10. `[writable]` Market asks Account
-        ///   11. `[writable]` Market event queue Account
-        ///   12. `[writable]` Market coin vault Account
-        ///   13. `[writable]` Market pc vault Account
-        ///   14. '[]` Market vault signer Account
-        ///   15. `[writable]` User source token Account.
-        ///   16. `[writable]` User destination token Account.
-        ///   17. `[signer]` User wallet Account
-
-        */
-
-        let (amount_in, rest) = unpack_u64(rest).unwrap();
-        let (_minimum_amount_out, _) = unpack_u64(rest).unwrap();
-
-        // let user_wallet = instr.accounts.get(17).map(|s| s.as_str());
         let amm_account = instr.accounts.get(1).map(|s| s.as_str());
 
         println!(
