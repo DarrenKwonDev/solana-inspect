@@ -12,7 +12,9 @@ cli for inspect solana blockchain
 - [x] idl_parse
   - print instruction's name and descriminator in anchor convention
   - ⚠️ Caution! Some projects (e.g., Raydium AMM) were not built with the Anchor framework. In those cases, parsing the IDL is pointless—you should look at their source code instead.
-- [x] token_list
+- [x] token_list  
+- [ ] block_viwer   
+- [ ] signer_tracking  
 - [ ] swap_watch
   - swap pool을 소유한 곳만 대상 (raydium, meteora, orca, pump)
   - aggregator(jupiter, okx dex)와 aggregator를 대상으로 한 private pool(solfi) 등은 제외 
@@ -44,4 +46,4 @@ yes
 ## known issues
 
 - Cache files can be polluted due to race conditions. Currently, this project assumes the CLI is executed one at a time.
-
+- `Not provide jito bundle identification`, because even if it is a bundle, the transaction is represented individually
