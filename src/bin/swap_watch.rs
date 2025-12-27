@@ -8,7 +8,7 @@ use solana_inspect::{
   dex_filter::{self, RAYDIUM_CLMM, RAYDIUM_CPMM, RAYDIUM_LEGACY_AMM},
   fetcher::{
     cache::{Cache, TokenCacheType, get_cache_dir},
-    jupyter_api::{TokenMetadata, TokenTagType, fetch_token_all},
+    jupyter_api::TokenMetadata,
   },
   protocols::raydium::amm::handle_raydium_amm_instr,
 };
