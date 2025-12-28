@@ -6,25 +6,37 @@
 
 cli for inspect solana blockchain    
 
-## tools 
+## tools
+
+### general
+
 - [x] rpc_check   
 - [x] dex_count   
 - [x] idl_parse
   - print instruction's name and descriminator in anchor convention
   - ⚠️ Caution! Some projects (e.g., Raydium AMM) were not built with the Anchor framework. In those cases, parsing the IDL is pointless—you should look at their source code instead.
 - [x] token_list  
-- [ ] pump_watch
-  - parse pump program for snipping and listing edge  
-- [ ] swap_watch
-  - swap pool을 소유한 곳만 대상 (raydium, meteora, orca, pump)
-  - aggregator(jupiter, okx dex)와 aggregator를 대상으로 한 private pool(solfi) 등은 제외 
 - [ ] block_viwer  
   - block_viwer --block $num  
   - block_viwer --block $num --filter dex
   - block_viwer --block $num --json
   - block_viwer --block $num --json --filter dex
 - [ ] signer_scan  
-  - signer_scan --block $num  
+  - signer_scan --block $num
+  
+### pump
+
+- [ ] pump_bonding_curve
+  - pump_bonding_curve $CA
+  - Create 된 토큰 감지 후 초기 3분 간의 buy, sell 이벤트마다 bonding curve에 의해 계산된 가격을 출력합니다 
+- [ ] pump_sniper_watch
+  - pump_sniper_watch $CA --count $num
+  - 특정 CA 가 Create 된 이후 $num 명의 buyer들을 추적합니다 
+
+### others
+- [ ] swap_watch
+  - swap pool을 소유한 곳만 대상 (raydium, meteora, orca, pump)
+  - aggregator(jupiter, okx dex)와 aggregator를 대상으로 한 private pool(solfi) 등은 제외 
 
 ## can I handle solana data in single core? do napkin math. 
 
@@ -54,3 +66,4 @@ yes
 
 - Cache files can be polluted due to race conditions. Currently, this project assumes the CLI is executed one at a time.
 - `Not provide jito bundle identification`, because even if it is a bundle, the transaction is represented individually
+- `standard ws may lag 30~50 blocks` use enhanced websocket or shred takes a lot of money. 

@@ -1,12 +1,9 @@
-use anyhow::{Result, anyhow};
-use solana_transaction_status::{
-  EncodedTransactionWithStatusMeta, UiPartiallyDecodedInstruction, UiTransactionStatusMeta,
-  option_serializer::OptionSerializer,
-};
+use anyhow::{anyhow, Result};
+use solana_transaction_status::{UiPartiallyDecodedInstruction, UiTransactionStatusMeta};
 
 use crate::{
+  fetcher::{cache::TokenCacheType, TOKEN_ALL_KEY},
   MAGENTA, RESET,
-  fetcher::{TOKEN_ALL_KEY, cache::TokenCacheType},
 };
 
 /*

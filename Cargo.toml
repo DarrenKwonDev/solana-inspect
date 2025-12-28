@@ -42,3 +42,7 @@ path = "src/bin/token_list.rs"
 name = "swap_watch"
 path = "src/bin/swap_watch.rs"
 
+[[bin]]
+name = "pump_bonding_curve"
+path = "src/bin/pump_bonding_curve.rs"
+
